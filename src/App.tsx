@@ -31,6 +31,7 @@ const pipeline: { status: LeadStatus; title: string; color: string }[] = [
   { status: 'proposta', title: 'Propostas', color: 'bg-orange-500' },
   { status: 'respondeu', title: 'Responderam', color: 'bg-cyan-500' },
   { status: 'fechado', title: 'Fechados', color: 'bg-emerald-500' },
+  { status: 'descartado', title: 'Descartados', color: 'bg-slate-500' },
 ]
 
 type Section = 'overview' | 'pipeline' | 'customers' | 'sites' | 'followups' | 'contracts' | 'finance'
@@ -90,6 +91,7 @@ function App() {
   const [followupsLoading, setFollowupsLoading] = useState(false)
   const [error, setError] = useState('')
   const [actionSlug, setActionSlug] = useState('')
+  const [updatingStatusSlug, setUpdatingStatusSlug] = useState('')
 
   const loadData = async () => {
     const [leadData, summaryData] = await Promise.all([api.listLeads(), api.summary()])
@@ -132,6 +134,22 @@ function App() {
         .then(setFollowups)
         .catch((requestError: Error) => setError(requestError.message))
         .finally(() => setFollowupsLoading(false))
+    }
+  }
+
+  const changeStatus = async (lead: Lead, status: LeadStatus) => {
+    if (status === lead.status || updatingStatusSlug) return
+
+    setUpdatingStatusSlug(lead.slug)
+    setError('')
+    try {
+      const updatedLead = await api.updateStatus(lead.slug, status)
+      setLeads((current) => current.map((item) => item.slug === updatedLead.slug ? updatedLead : item))
+      setSummary(await api.summary())
+    } catch (requestError) {
+      setError((requestError as Error).message)
+    } finally {
+      setUpdatingStatusSlug('')
     }
   }
 
@@ -180,7 +198,7 @@ function App() {
   )
 
   const renderPipeline = () => (
-    <div className="overflow-x-auto pb-4"><div className="flex min-w-max gap-4 xl:min-w-0">{pipeline.map((column) => <PipelineColumn key={column.status} {...column} leads={visibleLeads.filter((lead) => lead.status === column.status)} />)}</div></div>
+    <div className="overflow-x-auto pb-4"><div className="flex min-w-max gap-4 xl:min-w-0">{pipeline.map((column) => <PipelineColumn key={column.status} {...column} leads={visibleLeads.filter((lead) => lead.status === column.status)} updatingSlug={updatingStatusSlug} onStatusChange={(lead, status) => void changeStatus(lead, status)} />)}</div></div>
   )
 
   const renderCustomers = () => customers.length === 0 ? <EmptyState>Nenhum cliente fechado. Os leads aparecem aqui quando chegam à etapa “Fechado”.</EmptyState> : (
