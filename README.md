@@ -41,7 +41,7 @@ Search-Customers/
 │   ├── dashboard-leads/
 │   ├── redesign-premium/
 │   ├── proposta-gmail/
-│   ├── deploy-hostgator/
+│   ├── deploy-hostinger/
 │   └── contrato-servico/
 ├── server/
 │   ├── db/database.ts          # Inicialização e schema SQLite
@@ -209,7 +209,7 @@ Crie um rascunho de proposta para clinica-vida, sem enviar automaticamente.
 ### Publicar
 
 ```text
-Publique o site aprovado da clinica-vida por SFTP e verifique o HTTPS.
+Publique o site aprovado da clinica-vida na Hostinger por SFTP e verifique o HTTPS.
 ```
 
 ### Formalizar
@@ -304,6 +304,39 @@ npm start
 
 A aplicação completa ficará em `http://127.0.0.1:8765`. Somente a pasta `dist` é servida estaticamente; o banco, as configurações e os arquivos internos não ficam expostos por HTTP.
 
+## Publicação de sites na Hostinger
+
+A Hostinger é usada somente para hospedar os sites criados para os clientes. O CRM permanece local e não deve ser enviado para a hospedagem.
+
+Para publicar uma página ou site aprovado:
+
+1. Gere e valide os arquivos finais do site do cliente.
+2. Confirme no hPanel o domínio e o diretório raiz correspondente.
+3. Faça backup caso existam arquivos anteriores no destino.
+4. Publique somente os arquivos finais do site, preferencialmente por SFTP, SSH ou pelo gerenciador de arquivos do hPanel.
+5. Não envie o CRM, `.env`, bancos SQLite, `node_modules`, skills ou arquivos internos deste plugin.
+6. Verifique DNS, HTTPS, assets, rotas, responsividade, formulários e links.
+7. Atualize a URL no CRM local e marque o lead como `publicado` somente após a validação.
+
+Não presuma que o diretório seja sempre `public_html`; use o caminho informado pelo hPanel para o domínio selecionado.
+
+## Uso local do CRM
+
+O dashboard, a API Fastify e o banco SQLite são ferramentas locais para gerenciar leads e clientes. Inicie-os apenas no computador de trabalho:
+
+```bash
+npm run dev
+```
+
+Para usar o build local de produção:
+
+```bash
+npm run build
+npm start
+```
+
+Mantenha `HOST=127.0.0.1`, não copie o banco para a pasta pública da Hostinger e faça backups periódicos de `data/search-customers.db` em um local privado e seguro.
+
 ## Segurança e privacidade
 
 - A aplicação escuta somente em localhost por padrão.
@@ -311,7 +344,7 @@ A aplicação completa ficará em `http://127.0.0.1:8765`. Somente a pasta `dist
 - A API valida payloads e limita requisições a 1 MB.
 - O frontend não injeta HTML vindo de leads.
 - Exclusões são lógicas para reduzir perdas acidentais.
-- Não use FTP simples; prefira SFTP ou FTPS.
+- Na Hostinger, prefira SFTP, SSH ou o gerenciador de arquivos do hPanel; não use FTP simples.
 - Não salve senhas no banco, nas observações ou nos arquivos das skills.
 - Revise os termos do Google Maps antes de armazenar dados obtidos pela plataforma.
 - Trate dados pessoais conforme a LGPD e mantenha apenas os dados necessários.
