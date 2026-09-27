@@ -1,0 +1,51 @@
+{
+  "name": "search-customers",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Plugin profissional de prospecção e CRM para Google Antigravity.",
+  "scripts": {
+    "dev": "concurrently -k -n API,WEB -c yellow,cyan \"npm:dev:api\" \"npm:dev:web\"",
+    "dev:web": "vite",
+    "dev:api": "tsx watch server/index.ts",
+    "start": "tsx server/index.ts",
+    "mcp": "tsx server/mcp/index.ts",
+    "build": "tsc -b && vite build",
+    "lint": "oxlint .",
+    "typecheck": "tsc -b --pretty false",
+    "test": "vitest run",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@fastify/cors": "^11.2.0",
+    "@fastify/static": "^10.1.5",
+    "@modelcontextprotocol/sdk": "^1.27.1",
+    "better-sqlite3": "^12.8.0",
+    "clsx": "^2.1.1",
+    "fastify": "^5.8.2",
+    "lucide-react": "^0.577.0",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "react-router-dom": "^7.13.2",
+    "tailwind-merge": "^3.5.0",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.2.2",
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^24.13.3",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.7",
+    "@vitejs/plugin-react": "^6.1.1",
+    "concurrently": "^9.2.1",
+    "oxlint": "^1.81.0",
+    "tailwindcss": "^4.2.2",
+    "tsx": "^4.21.0",
+    "typescript": "~6.0.2",
+    "vite": "^8.3.0",
+    "vitest": "^4.1.0"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  }
+}

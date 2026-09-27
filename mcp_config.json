@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "search-customers-crm": {
+      "command": "npm",
+      "args": ["run", "mcp"],
+      "cwd": "${pluginDir}"
+    },
+    "playwright": {
+      "command": "npx",
+      "args": ["-y", "@playwright/mcp@0.0.68"]
+    }
+  }
+}

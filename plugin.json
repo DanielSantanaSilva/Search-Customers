@@ -1,0 +1,8 @@
+{
+  "name": "search-customers",
+  "displayName": "Search Customers",
+  "version": "1.0.0",
+  "description": "Plugin de prospecção, CRM, redesign e gestão comercial para o Google Antigravity.",
+  "author": "Search Customers Contributors",
+  "license": "MIT"
+}
