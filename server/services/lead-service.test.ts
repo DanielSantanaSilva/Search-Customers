@@ -53,4 +53,13 @@ describe('LeadService', () => {
 
     expect(service.summary()).toMatchObject({ total: 1, totalFechado: 3000, totalRecebido: 3000, mrr: 200, projecaoDozeMeses: 5400 })
   })
+
+  it('permite follow-up apenas para leads em proposta', () => {
+    service.create({ slug: 'lead-b', nome: 'Lead B', nicho: '', cidade: '', nota: null, avaliacoes: 0, email: '', telefone: '', whatsapp: '', siteAntigo: '', motivo: '', urlNova: '', observacoes: '' })
+
+    expect(() => service.recordFollowup('lead-b')).toThrow('Follow-up disponível apenas para leads em proposta')
+
+    service.update('lead-b', { status: 'proposta' })
+    expect(service.recordFollowup('lead-b').slug).toBe('lead-b')
+  })
 })

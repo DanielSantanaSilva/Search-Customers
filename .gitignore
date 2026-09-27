@@ -17,6 +17,7 @@ dist-ssr
 data/*.db
 data/*.db-*
 coverage
+.playwright-mcp
 
 # Editor directories and files
 .vscode/*

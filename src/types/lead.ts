@@ -36,6 +36,28 @@ export interface Lead {
   atualizadoEm: string
 }
 
+export type LeadPatch = Partial<Pick<Lead,
+  | 'nome'
+  | 'nicho'
+  | 'cidade'
+  | 'nota'
+  | 'avaliacoes'
+  | 'email'
+  | 'telefone'
+  | 'whatsapp'
+  | 'siteAntigo'
+  | 'motivo'
+  | 'status'
+  | 'urlNova'
+  | 'valor'
+  | 'observacoes'
+  | 'contratoStatus'
+  | 'manutencao'
+  | 'pago'
+  | 'documentoCliente'
+  | 'enderecoCliente'
+>>
+
 export interface DashboardSummary {
   total: number
   porStatus: Record<LeadStatus, number>

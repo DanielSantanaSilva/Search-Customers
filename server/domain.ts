@@ -15,6 +15,19 @@ export const contractStatuses = ['pendente', 'enviado', 'assinado'] as const
 export const leadStatusSchema = z.enum(leadStatuses)
 export const contractStatusSchema = z.enum(contractStatuses)
 
+const webUrlSchema = z.url().refine((value) => {
+  const protocol = new URL(value).protocol
+  return protocol === 'http:' || protocol === 'https:'
+}, 'A URL deve usar HTTP ou HTTPS')
+
+export const followupQuerySchema = z.object({
+  days: z.coerce.number().int().min(1).max(30).default(3),
+})
+
+export const followupCreateSchema = z.object({
+  details: z.string().trim().max(1_500).optional(),
+})
+
 export const leadCreateSchema = z.object({
   slug: z
     .string()
@@ -30,9 +43,9 @@ export const leadCreateSchema = z.object({
   email: z.union([z.literal(''), z.email()]).default(''),
   telefone: z.string().trim().max(40).default(''),
   whatsapp: z.string().trim().max(40).default(''),
-  siteAntigo: z.union([z.literal(''), z.url()]).default(''),
+  siteAntigo: z.union([z.literal(''), webUrlSchema]).default(''),
   motivo: z.string().trim().max(1_500).default(''),
-  urlNova: z.union([z.literal(''), z.url()]).default(''),
+  urlNova: z.union([z.literal(''), webUrlSchema]).default(''),
   observacoes: z.string().trim().max(5_000).default(''),
 })
 

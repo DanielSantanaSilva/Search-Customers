@@ -145,13 +145,10 @@ export class LeadService {
   }
 
   update(slug: string, patch: LeadPatch): Lead {
-    if (!this.get(slug)) {
-      throw new Error('Lead não encontrado')
-    }
-
+    const current = this.getOrThrow(slug)
     const entries = Object.entries(patch) as [keyof LeadPatch, LeadPatch[keyof LeadPatch]][]
     if (entries.length === 0) {
-      return this.getOrThrow(slug)
+      return current
     }
 
     const assignments = entries.map(([field]) => `${columnByField[field]} = @${field}`)
@@ -159,14 +156,18 @@ export class LeadService {
       entries.map(([field, value]) => [field, typeof value === 'boolean' ? Number(value) : value]),
     )
 
-    if (patch.status === 'proposta') {
-      assignments.push('data_proposta = COALESCE(data_proposta, CURRENT_TIMESTAMP)')
+    if (patch.status === 'proposta' && current.status !== 'proposta') {
+      assignments.push('data_proposta = CURRENT_TIMESTAMP')
     }
 
     const update = this.db.transaction(() => {
-      this.db
-        .prepare(`UPDATE leads SET ${assignments.join(', ')}, atualizado_em = CURRENT_TIMESTAMP WHERE slug = @slug`)
+      const result = this.db
+        .prepare(`UPDATE leads SET ${assignments.join(', ')}, atualizado_em = CURRENT_TIMESTAMP WHERE slug = @slug AND excluido_em IS NULL`)
         .run({ ...values, slug })
+
+      if (result.changes === 0) {
+        throw new Error('Lead não encontrado')
+      }
 
       if (patch.status) {
         this.recordEvent(slug, 'status_alterado', patch.status)
@@ -206,7 +207,9 @@ export class LeadService {
           AND datetime(data_proposta) <= datetime('now', ?)
           AND NOT EXISTS (
             SELECT 1 FROM pipeline_events
-            WHERE lead_slug = leads.slug AND tipo = 'followup_registrado'
+            WHERE lead_slug = leads.slug
+              AND tipo = 'followup_registrado'
+              AND datetime(criado_em) >= datetime(leads.data_proposta)
           )
         ORDER BY data_proposta ASC
       `)
@@ -217,6 +220,9 @@ export class LeadService {
 
   recordFollowup(slug: string, details = 'Follow-up realizado'): Lead {
     const lead = this.getOrThrow(slug)
+    if (lead.status !== 'proposta') {
+      throw new Error('Follow-up disponível apenas para leads em proposta')
+    }
     this.recordEvent(slug, 'followup_registrado', details)
     return lead
   }

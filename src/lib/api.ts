@@ -1,4 +1,4 @@
-import type { DashboardSummary, Lead, LeadStatus } from '../types/lead'
+import type { DashboardSummary, Lead, LeadPatch, LeadStatus } from '../types/lead'
 
 const request = async <T>(path: string, options?: RequestInit): Promise<T> => {
   const response = await fetch(path, {
@@ -20,7 +20,7 @@ const request = async <T>(path: string, options?: RequestInit): Promise<T> => {
 export const api = {
   listLeads: () => request<Lead[]>('/api/leads'),
   summary: () => request<DashboardSummary>('/api/dashboard/summary'),
-  updateLead: (slug: string, patch: Partial<Lead>) =>
+  updateLead: (slug: string, patch: LeadPatch) =>
     request<Lead>(`/api/leads/${encodeURIComponent(slug)}`, {
       method: 'PATCH',
       body: JSON.stringify(patch),
@@ -29,5 +29,11 @@ export const api = {
     request<Lead>(`/api/leads/${encodeURIComponent(slug)}`, {
       method: 'PATCH',
       body: JSON.stringify({ status }),
+    }),
+  listFollowups: (days = 3) => request<Lead[]>(`/api/followups?days=${days}`),
+  recordFollowup: (slug: string, details: string) =>
+    request<Lead>(`/api/leads/${encodeURIComponent(slug)}/followups`, {
+      method: 'POST',
+      body: JSON.stringify({ details }),
     }),
 }

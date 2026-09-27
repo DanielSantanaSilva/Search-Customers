@@ -5,7 +5,7 @@ import { existsSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { ZodError } from 'zod'
-import { leadCreateSchema, leadPatchSchema, leadStatusSchema } from './domain.ts'
+import { followupCreateSchema, followupQuerySchema, leadCreateSchema, leadPatchSchema, leadStatusSchema } from './domain.ts'
 import type { LeadService } from './services/lead-service.ts'
 
 const moduleDirectory = dirname(fileURLToPath(import.meta.url))
@@ -55,15 +55,14 @@ export const createApp = async (leadService: LeadService) => {
   app.get('/api/dashboard/summary', async () => leadService.summary())
 
   app.get('/api/followups', async (request) => {
-    const query = request.query as { days?: string }
-    const days = Math.min(Math.max(Number(query.days ?? 3), 1), 30)
+    const { days } = followupQuerySchema.parse(request.query)
     return leadService.dueFollowups(days)
   })
 
   app.post('/api/leads/:slug/followups', async (request) => {
     const { slug } = request.params as { slug: string }
-    const body = (request.body ?? {}) as { details?: string }
-    return leadService.recordFollowup(slug, body.details)
+    const { details } = followupCreateSchema.parse(request.body ?? {})
+    return leadService.recordFollowup(slug, details)
   })
 
   app.setErrorHandler((error, _request, reply) => {
@@ -73,6 +72,10 @@ export const createApp = async (leadService: LeadService) => {
 
     if (error instanceof Error && error.message === 'Lead não encontrado') {
       return reply.code(404).send({ message: error.message })
+    }
+
+    if (error instanceof Error && error.message === 'Follow-up disponível apenas para leads em proposta') {
+      return reply.code(409).send({ message: error.message })
     }
 
     app.log.error(error)
